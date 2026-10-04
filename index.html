@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏛️ Grammar Auction - Betting Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ROLE SELECT -->
+    <div id="landing-screen" class="screen active">
+        <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+        <p style="color: #94a3b8; margin-bottom: 30px; font-size: 1.2rem;">Multiplayer Classroom Betting Game</p>
+        <div class="role-cards">
+            <div class="role-card card" id="btn-host-game">
+                <div class="icon">🖥️</div>
+                <h2>Host / Big Screen</h2>
+                <p>Project this on the classroom display. Controls questions, timer, and scoring.</p>
+            </div>
+            <div class="role-card card" id="btn-show-join">
+                <div class="icon">📱</div>
+                <h2>Student / Mobile</h2>
+                <p>Join from your phone. Place bets on the correct answers.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT JOIN -->
+    <div id="client-join-screen" class="screen">
+        <div class="client-join">
+            <h2 class="gold glow-text">📱 Join the Game</h2>
+            <label>Room Code</label>
+            <input type="text" id="join-room-code" placeholder="0000" maxlength="4" inputmode="numeric">
+            <label>Team Name</label>
+            <input type="text" id="join-team-name" placeholder="e.g. The Tigers" maxlength="15">
+            <button id="btn-join-game" class="btn btn-gold btn-lg">🔗 Join Game</button>
+            <button id="btn-back-landing" class="btn btn-sm" style="background:transparent; color:#94a3b8; margin-top:10px;">Cancel</button>
+            <div id="join-error" class="red hidden" style="margin-top:15px; font-weight:bold;"></div>
+        </div>
+    </div>
+
+    <!-- HOST LOBBY -->
+    <div id="host-lobby-screen" class="screen">
+        <div class="host-header">
+            <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="color:#94a3b8;font-size:0.75rem;">ROOM</span>
+                <div class="room-badge" id="host-room-code-display"></div>
+            </div>
+        </div>
+        <div class="setup-panel">
+            <div class="setup-left">
+                <div class="card">
+                    <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">👥 Connected (<span id="connectedCount">0</span>)</h3>
+                    <div class="lobby-teams" id="host-team-list">
+                        <p style="color:#64748b;font-style:italic;font-size:0.85rem;grid-column:1/-1;">Waiting for students to join...</p>
+                    </div>
+                </div>
+                <button id="btn-start-game" class="btn btn-gold btn-lg" disabled>🎮 Need at least 1 team</button>
+            </div>
+            <div class="card qr-section">
+                <h3 class="gold" style="margin-bottom:8px;font-size:0.95rem;">📲 Scan to Join</h3>
+                <div id="qrcode"></div>
+                <div class="join-link" id="share-url"></div>
+                <button id="btn-copy-url" class="btn btn-blue btn-sm">📋 Copy Student Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOST GAME -->
+    <div id="host-game-screen" class="screen">
+        <div class="host-header">
+            <h1 class="gold glow-text">🏛️ Grammar Auction</h1>
+            <button id="btn-mute" class="btn btn-sm" style="background:rgba(15,23,42,0.6);border:1px solid rgba(100,116,139,0.3);">Mute 🔊</button>
+        </div>
+        <div class="game-layout">
+            <!-- LEFT: Question + Bets -->
+            <div class="game-left">
+                <div class="question-display card">
+                    <div class="q-number" id="question-counter"></div>
+                    <div class="q-sentence" id="question-display"></div>
+                    <div class="q-timer" id="timer-display">20</div>
+                </div>
+                <div id="options-display" class="options-grid"></div>
+
+                <!-- Answer Reveal Bar -->
+                <div id="answer-reveal" class="answer-reveal card hidden"></div>
+
+                <!-- Bets Grid -->
+                <div class="bets-grid" id="bets-grid"></div>
+
+                <!-- Controls -->
+                <div class="host-controls" id="host-controls">
+                    <button id="btn-skip-timer" class="btn btn-blue btn-sm">⏩ Skip Timer</button>
+                    <button id="btn-next-round" class="btn btn-gold hidden">▶️ Next Question</button>
+                </div>
+            </div>
+            <!-- RIGHT: Leaderboard -->
+            <div class="game-right">
+                <div class="leaderboard-panel card">
+                    <h3 class="gold" style="margin-bottom:15px;">🏆 Leaderboard</h3>
+                    <div class="lb-rows" id="leaderboard-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT LOBBY -->
+    <div id="client-lobby-screen" class="screen">
+        <div class="client-header" style="margin:15px;border-radius:12px;flex-direction:column;gap:5px;">
+            <div class="client-team-name" id="client-team-name-display"></div>
+            <div class="client-balance">$<span id="client-bankroll">1000</span></div>
+            <div class="client-status">Waiting for host to start...</div>
+        </div>
+        <div class="client-waiting">
+            <p>👀 Watch the big screen!</p>
+            <p class="dots" style="margin-top:8px;">Waiting</p>
+        </div>
+    </div>
+
+    <!-- CLIENT GAME -->
+    <div id="client-game-screen" class="screen">
+        <div class="client-header" style="margin:10px;border-radius:12px;flex-direction:column;gap:5px;">
+            <div class="client-team-name" id="client-team-name-game"></div>
+            <div class="client-balance">$<span id="client-bankroll-game">1000</span></div>
+            <div class="client-status" id="client-status-game">Place your bet!</div>
+        </div>
+
+        <div id="client-betting-area" class="client-betting">
+            <h3>Choose your answer:</h3>
+            <div id="client-options" class="client-options-grid"></div>
+            <div class="wager-container" style="margin-top:25px;">
+                <label style="color:#94a3b8;font-weight:bold;display:block;margin-bottom:10px;">💰 Bet Amount</label>
+                <input type="range" id="wager-slider" min="10" max="1000" value="100">
+                <div class="wager-input-row">
+                    <span>$</span>
+                    <input type="number" id="wager-amount" min="10" max="1000" value="100">
+                </div>
+                <div style="display:flex;justify-content:center;gap:10px;margin-top:15px;">
+                    <button class="btn btn-sm btn-blue" id="btn-bet-min">Min</button>
+                    <button class="btn btn-sm btn-blue" id="btn-bet-half">Half</button>
+                    <button class="btn btn-sm btn-gold" id="btn-bet-max">🔥 ALL IN</button>
+                </div>
+            </div>
+            <button id="btn-submit-bet" class="btn btn-gold btn-lg" disabled>🎯 Submit Bet</button>
+        </div>
+
+        <div id="client-waiting-area" class="client-waiting hidden">
+            <h3 class="gold" style="margin-bottom:10px;">✅ Bet Locked In!</h3>
+            <p>You bet <span class="gold" style="font-weight:bold;">$<span id="client-current-bet"></span></span> on <span class="gold" style="font-weight:bold;"><span id="client-current-choice"></span></span></p>
+            <p style="margin-top:15px;">Watch the big screen...</p>
+            <p class="dots"></p>
+        </div>
+
+        <div id="client-result-area" class="client-result hidden">
+            <div class="verdict" id="client-result-title"></div>
+            <div class="change" id="client-result-detail"></div>
+        </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loading-overlay" class="overlay hidden">
+        <div class="spinner"></div>
+        <p id="loading-text" style="color:#f59e0b;font-weight:bold;font-size:1.2rem;">Connecting...</p>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="audio.js"></script>
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
